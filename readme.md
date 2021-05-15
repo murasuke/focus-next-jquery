@@ -1,10 +1,12 @@
-# enterキー押下時に次項目へフォーカス移動するjavascript(jQuery)
+# enterキーでフォーカスを移動するjavascript(jQuery版)
 
 [テストページ](https://murasuke.github.io/focus-next-jquery/public/index.html)
 
 ## 目的
 
-似たようなスクリプトは探せば結構あるのですが、問題が多いので1から作りました
+似たようなスクリプトは探せば結構あるのですが、問題が多いので1から作りました。
+
+button上でenter押下時も移動するようにしていますが、実際のアプリに組み込んで動作確認したら動作を変えるかもしれません。
 
 * enterキー押下時に次項目へ移動するjavascript(jQuery利用)
 * フォーカス移動概要 
@@ -20,6 +22,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script>    
       $(() => {
+        // :focusable はマイナスのtabindexを含む
+        //  ⇒enter時に次項目へ移動するためのイベント対象のため含めている。
         const elements = ':focusable:not(a)';
         $(elements).keypress((e) => {
           if (e.key === 'Enter') {
@@ -45,6 +49,7 @@
               sortedList = elements;
             }
 
+            // 現在の項目位置から、移動先を取得する
             const index = $(sortedList).index(e.target);
             const nextFilter = e.shiftKey ? `:lt(${index}):last` : `:gt(${index}):first`;            
           　const nextTarget = $(sortedList).filter(nextFilter);
