@@ -2,9 +2,20 @@
 
 [テストページ](https://murasuke.github.io/focus-next-jquery/public/index.html)
 
+## 目的
+
+似たようなスクリプトは探せば結構あるのですが、問題が多いので1から作りました
+
+* enterキー押下時に次項目へ移動するjavascript(jQuery利用)
+* フォーカス移動概要 
+  * tabindex順に移動します(tabindex1以上⇒tabindex未指定の順)
+  * tabindexがマイナスの項目へは移動しません
+  * tabindexがマイナスの項目から移動する場合は、直近前後の項目へ移動します。
+  * 通常移動しない項目<div>や<span>にtabindexを付けると移動可能になることを考慮
+  * 上記に関連して、フォーカス移動可能な項目が入れ子になっていても移動できる
+
 ## 使い方
 ```html
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script>    
@@ -60,7 +71,7 @@
 1. tabindexがマイナスの項目には移動しない。
 1. tabindexがマイナスの項目にフォーカスがある場合、次項目はDOM出現順に移動可能な項目へ移動
 1. Shiftを押下時は逆順に移動
-1. ラジオボタンは同じnameを持つ場合、グループ化される。
+1. ラジオボタンは同じnameを持つ場合、グループ化される。  ・・・【制御がややこしいため、未サポート】
   * グループがチェックを持つ場合は、そこへフォーカスする。
   * チェックがない場合は、グループの先頭にフォーカスする。
   * 同一グループ内で異なるtabindexを持つ場合
@@ -68,7 +79,7 @@
     * チェックがあれば、チェックがある箇所のみが移動対象となる
 
 
-## 仕様
+## その他
 * ~~anchorも移動対象~~ 移動しても、Enterでリンク先に移動してしまうので対象からしています。
 
 ## 制限事項
