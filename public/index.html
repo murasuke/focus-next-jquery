@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>move focus on enter event</title>
+    <meta name="description" content="move focus on enter event" />
+  </head>
+  <body>
+    <pre>
+      Enterキーでフォーカス移動するサンプル
+    </pre>
+    <form id="form">
+      <table>
+        <tr id="row1">
+          <td>
+            <input type="text" value="no tabindex" />
+          </td>
+          <td>            
+            <input type="text" tabindex="1" value="tabindex is 1" />
+          </td>
+          <td>            
+            <a href="" >no tabindex</a>
+          </td>
+        </tr>
+        <tr>
+          <td>            
+            <input type="text" tabindex="0" value="tabindex is 0" readonly />
+          </td>
+          <td>
+            <input type="text" tabindex="-1" value="tabindex is -1" />
+          </td>
+          <td>            
+            <textarea>tabindex is blank</textarea>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" tabindex="-2" value="tabindex is -2"/>
+          </td>
+          <td>
+            <input type="text" tabindex="3" value="tabindex is 3" />
+          </td>
+          <td tabindex="3">
+            <p tabindex="2">&lt;p&gt; tabindex is 2&lt;/p&gt;</p>  
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="text" value="no tabindex" disabled />
+          </td>
+          <td>
+            <input type="text" tabindex="3" value="tabindex is 3" hidden />
+          </td>
+          <td>            
+            <input type="text" tabindex="" value="tabindex is blank" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="button" tabindex="2" value="tabindex is 2"/>
+          </td>
+          <td>
+            <input type="button" value="no tabindex" disabled />
+          </td>
+          <td>            
+            <input type="button" tabindex="" value="tabindex is blank" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <input type="radio" name="radio" tabindex="2" value="tabindex is 2"/>
+            <input type="radio" name="radio" tabindex="2" value="tabindex is 2" checked />
+            <input type="radio" name="radio" tabindex="2" value="tabindex is 2"/>
+          </td>
+          <td>
+            <select>
+              <option value="dog">Dog</option>
+              <option value="cat">Cat</option>
+            </select>
+            <input type="radio" name="radio2" tabindex="2" value="tabindex is 2"/>
+            <input type="radio" name="radio2" tabindex="1" value="tabindex is 2"/>
+            <input type="radio" name="radio2" tabindex="2" value="tabindex is 2"/>
+          </td>
+          <td>            
+            <input type="checkbox"  tabindex="2" value="tabindex is 2"/>
+            <input type="checkbox"  tabindex="2" value="tabindex is 2" checked/>
+            <input type="checkbox"  tabindex="2" value="tabindex is 2"/>
+          </td>
+        </tr>
+      </table>
+    </form>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script>    
+      $(() => {
+        const elements = ':focusable:not(a)';
+        $(elements).keypress((e) => {
+          if (e.key === 'Enter') {
+            // submitしない
+            e.preventDefault();
+            //　focus可能な項目が入れ子になっている場合、targetのみで処理する
+            e.stopPropagation();
+
+            // tabindex順に移動するためソート
+            let sortedList = $(elements).sort((a,b) => {
+              if(a.tabIndex && b.tabIndex) {
+                return a.tabIndex - b.tabIndex; 
+              } else if(a.tabIndex && !b.tabIndex) {
+                return -1;
+              } else if(!a.tabIndex && b.tabIndex) {
+                return 1;
+              }
+              return 0;
+            });
+            
+            if (e.target.tabIndex < 0) {
+              // tabindexがマイナスの場合、DOM上で次の項目へ移動するためソート前の項目から検索する
+              sortedList = elements;
+            }
+
+            const index = $(sortedList).index(e.target);
+            const nextFilter = e.shiftKey ? `:lt(${index}):last` : `:gt(${index}):first`;            
+          　const nextTarget = $(sortedList).filter(nextFilter);
+
+            // shift + enterでtagindexがマイナスの項目へ移動するのを防ぐ
+            if (!nextTarget.length || nextTarget[0].tabIndex < 0) return;
+
+            // フォーカス移動＋文字列選択
+            nextTarget.focus();
+            if (typeof nextTarget.select === 'function') nextTarget.select();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
