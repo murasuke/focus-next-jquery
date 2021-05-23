@@ -100,7 +100,18 @@
         //  ⇒enter時に次項目へ移動するためのイベント対象のため含めている。
         const elements = ':focusable:not(a)';
         $(elements).keypress((e) => {
-          if (e.key === 'Enter') {
+          if (e.key === 'Enter' || e.key === '\n') {
+            if (e.ctrlKey && e.target.tagName === 'TEXTAREA' ) {
+              // Ctrl＋Enterで改行処理を行う
+              const t = e.target;           
+              const {selectionStart: start, selectionEnd: end} = t;
+              t.value = `${t.value.slice(0, start)}\n${t.value.slice(end)}`;
+              t.selectionStart = t.selectionEnd = start + 1;             
+              return;
+            } else if (e.ctrlKey) {
+              return;
+            }
+
             // submitしない
             e.preventDefault();
             //　focus可能な項目が入れ子になっている場合、targetのみで処理する
@@ -133,7 +144,9 @@
 
             // フォーカス移動＋文字列選択
             nextTarget.focus();
-            if (typeof nextTarget.select === 'function') nextTarget.select();
+            if (typeof nextTarget.select === 'function' && nextTarget[0].tagName === 'INPUT') {
+              nextTarget.select();
+            }
           }
         });
       });

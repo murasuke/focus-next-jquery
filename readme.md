@@ -1,4 +1,4 @@
-# enterキーでフォーカスを移動するjavascript(jQuery版)
+# Enterキーで次項目へフォーカス移動(jQuery版)
 
 [テストページ](https://murasuke.github.io/focus-next-jquery/public/index.html)
 
@@ -16,54 +16,59 @@ button上でenter押下時も移動するようにしていますが、実際の
   * 通常移動しない項目<div>や<span>にtabindexを付けると移動可能になることを考慮
   * 上記に関連して、フォーカス移動可能な項目が入れ子になっていても移動できる
 
-## 使い方
+### Tabの動作に合わせない仕様
+* anchorは移動対象から外しています。移動しても、Enterでリンク先に移動してしまい不便なためです。
+* textareaは移動対象ですが、Enterでは次へ移動するため改行できません。
+  ⇒Ctrl＋Enterで改行できるように制御しています。
+
+## ソース
 ```html
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script>    
-      $(() => {
-        // :focusable はマイナスのtabindexを含む
-        //  ⇒enter時に次項目へ移動するためのイベント対象のため含めている。
-        const elements = ':focusable:not(a)';
-        $(elements).keypress((e) => {
-          if (e.key === 'Enter') {
-            // submitしない
-            e.preventDefault();
-            //　focus可能な項目が入れ子になっている場合、targetのみで処理する
-            e.stopPropagation();
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script>    
+  $(() => {
+    // :focusable はマイナスのtabindexを含む
+    //  ⇒enter時に次項目へ移動するためのイベント対象のため含めている。
+    const elements = ':focusable:not(a)';
+    $(elements).keypress((e) => {
+      if (e.key === 'Enter') {
+        // submitしない
+        e.preventDefault();
+        //　focus可能な項目が入れ子になっている場合、targetのみで処理する
+        e.stopPropagation();
 
-            // tabindex順に移動するためソート
-            let sortedList = $(elements).sort((a,b) => {
-              if(a.tabIndex && b.tabIndex) {
-                return a.tabIndex - b.tabIndex; 
-              } else if(a.tabIndex && !b.tabIndex) {
-                return -1;
-              } else if(!a.tabIndex && b.tabIndex) {
-                return 1;
-              }
-              return 0;
-            });
-            
-            if (e.target.tabIndex < 0) {
-              // tabindexがマイナスの場合、DOM上で次の項目へ移動するためソート前の項目から検索する
-              sortedList = elements;
-            }
-
-            // 現在の項目位置から、移動先を取得する
-            const index = $(sortedList).index(e.target);
-            const nextFilter = e.shiftKey ? `:lt(${index}):last` : `:gt(${index}):first`;            
-          　const nextTarget = $(sortedList).filter(nextFilter);
-
-            // shift + enterでtagindexがマイナスの項目へ移動するのを防ぐ
-            if (!nextTarget.length || nextTarget[0].tabIndex < 0) return;
-
-            // フォーカス移動＋文字列選択
-            nextTarget.focus();
-            if (typeof nextTarget.select === 'function') nextTarget.select();
+        // tabindex順に移動するためソート
+        let sortedList = $(elements).sort((a,b) => {
+          if(a.tabIndex && b.tabIndex) {
+            return a.tabIndex - b.tabIndex; 
+          } else if(a.tabIndex && !b.tabIndex) {
+            return -1;
+          } else if(!a.tabIndex && b.tabIndex) {
+            return 1;
           }
+          return 0;
         });
-      });
-    </script>
+        
+        if (e.target.tabIndex < 0) {
+          // tabindexがマイナスの場合、DOM上で次の項目へ移動するためソート前の項目から検索する
+          sortedList = elements;
+        }
+
+        // 現在の項目位置から、移動先を取得する
+        const index = $(sortedList).index(e.target);
+        const nextFilter = e.shiftKey ? `:lt(${index}):last` : `:gt(${index}):first`;            
+      　const nextTarget = $(sortedList).filter(nextFilter);
+
+        // shift + enterでtagindexがマイナスの項目へ移動するのを防ぐ
+        if (!nextTarget.length || nextTarget[0].tabIndex < 0) return;
+
+        // フォーカス移動＋文字列選択
+        nextTarget.focus();
+        if (typeof nextTarget.select === 'function') nextTarget.select();
+      }
+    });
+  });
+</script>
 ```
 
 ## フォーカス移動の仕様(手で動かしながら調べたので違っているかも)
@@ -84,8 +89,7 @@ button上でenter押下時も移動するようにしていますが、実際の
     * チェックがあれば、チェックがある箇所のみが移動対象となる
 
 
-## その他
-* ~~anchorも移動対象~~ 移動しても、Enterでリンク先に移動してしまうので対象からしています。
+
 
 ## 制限事項
 
